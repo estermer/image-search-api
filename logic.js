@@ -11,5 +11,14 @@ module.exports = {
             })
         }
       });
+  },
+  parseData(array) {
+    return array.map((e) => {
+      return {
+        "url": e.hostPageDisplayUrl,
+        'snippet': e.name,
+        'thumbnail': e.thumbnailUrl
+      }
+    })
   }
 }
