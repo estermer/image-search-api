@@ -2,18 +2,12 @@ const express     = require('express');
 const app         = express();
 const mongoose    = require('mongoose');
 const request     = require('request');
-const bodyParser  = require('body-parser');
 const Latest      = require('./latest.model.js');
 const onlyOne     = require('./logic.js').onlyOne;
-const parseData     = require('./logic.js').parseData;
+const parseData   = require('./logic.js').parseData;
 const apiURL      = 'https://api.cognitive.microsoft.com/bing/v5.0/images/search?q=';
+const mongoURI    = process.env.MONGODB_URI || 'mongodb://localhost/image-search-api';
 
-// parse application/x-www-form-urlencoded
-app.use(bodyParser.urlencoded({ extended: false }))
-// parse application/json
-app.use(bodyParser.json())
-
-const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost/image-search-api';
 mongoose.connect(mongoURI);
 mongoose.Promise = global.Promise;
 
@@ -23,11 +17,15 @@ app.get('/', (req, res) => {
 
 app.get('/api/imagesearch/:term', (req, res) => {
   let term = req.params.term;
-  // let offset = req.body;
-  // console.log(offset);
+  let offset = req.query.offset;
+  let url = `${apiURL}${term}&count=10`;
+  console.log(url);
+
+  if(offset) url += `&offset=${offset}`;
+  console.log(url);
 
   let options = {
-    url: `${apiURL}${term}&count=10`,
+    url: url,
     headers: {
       'User-Agent': 'request',
       'Ocp-Apim-Subscription-Key': '0ce18ef270034c8eaf62955327421ef9'
