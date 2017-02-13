@@ -3,7 +3,7 @@ const app         = express();
 const mongoose    = require('mongoose');
 const request     = require('request');
 const Latest      = require('./latest.model.js');
-const onlyOne     = require('./logic.js').onlyOne;
+const onlyTen     = require('./logic.js').onlyTen;
 const parseData   = require('./logic.js').parseData;
 const apiURL      = 'https://api.cognitive.microsoft.com/bing/v5.0/images/search?q=';
 const mongoURI    = process.env.MONGODB_URI || 'mongodb://localhost/image-search-api';
@@ -18,8 +18,17 @@ app.get('/', (req, res) => {
 app.get('/api/imagesearch/:term', (req, res) => {
   let term = req.params.term;
   let offset = req.query.offset;
+  let timestamp = new Date(Date.now()).toLocaleString();
   let url = `${apiURL}${term}&count=10`;
-  console.log(url);
+  console.log(timestamp);
+
+  Latest.create({
+      term: term,
+      when: timestamp
+    })
+    .then((search) => {
+      onlyTen();
+    });
 
   if(offset) url += `&offset=${offset}`;
   console.log(url);
